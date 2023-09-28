@@ -1,8 +1,10 @@
-const { app, BrowserWindow } = require("electron");
+const { app, globalShortcut, BrowserWindow, clipboard } = require("electron");
 const path = require("path");
 
+let mainWindow;
+
 function createWindow() {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -10,11 +12,22 @@ function createWindow() {
     },
   });
 
-  win.loadURL("https://chat.openai.com/");
+  mainWindow.loadURL("https://chat.openai.com/");
 }
 
-app.whenReady().then(() => {
+app.on("ready", () => {
+  console.log("main.js", "ready");
   createWindow();
+
+  globalShortcut.register("CMD+G", () => {
+    mainWindow.show();
+    mainWindow.webContents.send("send-to-gpt", clipboard.readText());
+  });
+
+  app.on("will-quit", () => {
+    console.log("main.js", "will-quit");
+    globalShortcut.unregisterAll();
+  });
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
