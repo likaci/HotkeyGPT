@@ -5,10 +5,19 @@ window.addEventListener("DOMContentLoaded", () => {
 
   ipcRenderer.on("send-to-gpt", (event, data) => {
     console.log("preload.js", "send-to-gpt", data);
-    let textarea = document.getElementById("prompt-textarea");
-    let button = textarea?.nextSibling;
-    textarea?.value = data;
-    textarea?.dispatchEvent(new Event("input", { bubbles: true }));
-    button?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    const textarea = document.getElementById("prompt-textarea");
+
+    if (textarea) {
+      textarea.focus();
+      textarea.value = (data.prompt ? data.prompt : "") + data.text;
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    } else {
+      console.log("preload.js", "send-to-gpt", "textarea not found");
+    }
+
+    if (data.autoSend) {
+      const button = textarea?.nextSibling;
+      button?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    }
   });
 });

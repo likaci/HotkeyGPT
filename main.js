@@ -1,6 +1,13 @@
 const { app, globalShortcut, BrowserWindow, clipboard } = require("electron");
 const path = require("path");
 
+let config = {
+  url: "https://chat.openai.com/",
+  hotkey: "alt+z",
+  prompt: "Explain to me in simple terms:\n",
+  autoSend: true,
+};
+
 let mainWindow;
 
 function createWindow() {
@@ -12,16 +19,20 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadURL("https://chat.openai.com/");
+  mainWindow.loadURL(config.url);
 }
 
 app.on("ready", () => {
   console.log("main.js", "ready");
   createWindow();
 
-  globalShortcut.register("CMD+G", () => {
+  globalShortcut.register(config.hotkey, () => {
     mainWindow.show();
-    mainWindow.webContents.send("send-to-gpt", clipboard.readText());
+    mainWindow.webContents.send("send-to-gpt", {
+      prompt: config.prompt,
+      autoSend: config.autoSend,
+      text: clipboard.readText(),
+    });
   });
 
   app.on("will-quit", () => {
