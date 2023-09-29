@@ -12,8 +12,9 @@
       }
 
       #tabs-container {
+        position: relative;
         height: 36px;
-        background-color: #dee1e6;
+        background-color: #e8eaed;
         -webkit-app-region: drag;
         padding-left: 70px;
         display: flex;
@@ -30,24 +31,39 @@
         padding: 0 20px;
         margin-top: 3px;
         color: #3c403c;
+        border-radius: 6px 6px 0 0;
+        z-index: 1;
       }
 
       .tab:hover {
         background-color: #eff1f3;
+        z-index: 2;
       }
 
-      .tab:active {
+      .tab.selected {
         background-color: #ffffff;
+        z-index: 3;
       }
 
       .tab::after {
         content: "";
         position: absolute;
         top: 8px;
-        right: 0;
+        right: -1px;
         bottom: 8px;
         width: 1px;
         background-color: #8b8e92;
+      }
+      .tab:hover::after {
+        display: none;
+      }
+
+      .tab.selected::after {
+        display: none;
+      }
+
+      .tab:last-child::after {
+        display: none;
       }
     </style>
   </head>

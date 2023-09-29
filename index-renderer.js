@@ -7,15 +7,19 @@ window.electronAPI.onTabsChange((event, pages) => {
 function onTabClick(tabIndex) {
   console.log("onTabClick", tabIndex);
   window.electronAPI.activatePage(tabIndex);
+  initTabs();
 }
 
 async function initTabs() {
   console.log("initTabs");
   let pages = await window.electronAPI.getPagesData();
+  let index = (await window.electronAPI.getCurrentPageIndex()) || 0;
   console.log("pages", pages);
   let tabs = pages
     .map((p, i) => {
-      return `<li class="tab" onclick="onTabClick(${i})">${p.title}</li>`;
+      return `<li class="tab ${
+        i === index ? "selected" : ""
+      }" onclick="onTabClick(${i})">${p.title}</li>`;
     })
     .join("");
   console.log("tabs", tabs);

@@ -14,7 +14,7 @@ let CONFIG = new Store();
 const isMacOS = process.platform === "darwin";
 
 let mainWindow;
-let currentActivePageIndex;
+let currentPageIndex;
 let pageViews = [];
 
 let pageConfig = {
@@ -120,12 +120,17 @@ function getPagesData() {
   return pageConfig.pages;
 }
 
+function getCurrentPageIndex() {
+  console.log("getCurrentPageIndex");
+  return currentPageIndex;
+}
+
 function activatePage(_params, pageIndex) {
-  console.log("activatePage", currentActivePageIndex, pageIndex);
-  if (currentActivePageIndex === pageIndex) {
+  console.log("activatePage", currentPageIndex, pageIndex);
+  if (currentPageIndex === pageIndex) {
     return;
   }
-  currentActivePageIndex = pageIndex;
+  currentPageIndex = pageIndex;
 
   let browserView = pageViews[pageIndex];
   mainWindow.setBrowserView(browserView);
@@ -177,5 +182,6 @@ function notifyTabsChange(_params) {
 
 function regIpcHandles() {
   ipcMain.handle("getPagesData", getPagesData);
+  ipcMain.handle("getCurrentPageIndex", getCurrentPageIndex);
   ipcMain.on("activatePage", activatePage);
 }
