@@ -5,6 +5,8 @@ const {
   BrowserView,
   clipboard,
   ipcMain,
+  Menu,
+  MenuItem,
 } = require("electron");
 const { exec } = require("child_process");
 const Store = require("electron-store");
@@ -88,6 +90,7 @@ function createPageViews() {
       }
       mainWindow.show();
       activatePage(null, i);
+      notifyTabsChange();
       view.webContents.send("send-to-gpt", {
         autoSend: page.autoSend,
         text: page.prompt + (page.appendClipboard ? clipboard.readText() : ""),
@@ -96,11 +99,30 @@ function createPageViews() {
   });
 }
 
+function updateMenu() {
+  let defaultMenu = Menu.getApplicationMenu();
+  let submenu = [];
+  pageConfig.pages.forEach((page, i) => {
+    submenu.push(
+      new MenuItem({
+        label: page.title,
+        accelerator: isMacOS ? `Cmd+${i + 1}` : `Ctrl+${i + 1}`,
+        click: () => {
+          activatePage(null, i);
+          notifyTabsChange();
+        },
+      })
+    );
+  });
+  let menu = new MenuItem({ label: "Tab", submenu: submenu });
+  defaultMenu.append(menu);
+  Menu.setApplicationMenu(defaultMenu);
+}
+
 async function triggerCopy() {
   console.log("triggerCopy");
   clipboard.clear();
   for (let i = 0; i < 4; i++) {
-    console.log("triggerCopy try", i);
     exec(
       `/usr/bin/osascript -e 'tell application "System Events" \n keystroke "c" using {command down} \n end tell'`,
       (error, stdout, stderr) => {
@@ -109,6 +131,7 @@ async function triggerCopy() {
       }
     );
     await new Promise((resolve) => setTimeout(resolve, 100));
+    console.log("triggerCopy try ", i, clipboard.readText());
     if (clipboard.readText() !== "") {
       break;
     }
@@ -152,6 +175,7 @@ app.on("ready", () => {
   console.log("main.js", "ready");
 
   createWindow();
+  updateMenu();
   createPageViews();
   activatePage(null, 0);
 
@@ -177,7 +201,7 @@ app.on("window-all-closed", () => {
 });
 
 function notifyTabsChange(_params) {
-  mainWindow.webContents.send("tabs-change", getTabData());
+  mainWindow.webContents.send("tabsChange");
 }
 
 function regIpcHandles() {

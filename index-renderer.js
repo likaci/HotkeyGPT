@@ -2,6 +2,7 @@ let tabsContainer = document.querySelector("#tabs-container");
 
 window.electronAPI.onTabsChange((event, pages) => {
   console.log("onTabsChange", event, pages);
+  initTabs();
 });
 
 function onTabClick(tabIndex) {
