@@ -6,6 +6,8 @@ const {
   clipboard,
   ipcMain,
 } = require("electron");
+const Store = require("electron-store");
+let CONFIG = new Store();
 const { loadavg } = require("os");
 const path = require("path");
 const isMacOS = process.platform === "darwin";
@@ -17,23 +19,24 @@ let config = {
   pages: [
     {
       title: "👩‍🏫解释",
-      url: "https://google.com/",
+      url: "https://chat.openai.com/",
       hotkey: "alt+z",
       prompt: "请用简单的语言解释给我:\n",
       autoSend: true,
     },
     {
       title: "🔠翻译",
-      url: "https://twitter.com/",
+      url: "https://chat.openai.com/",
       hotkey: "alt+x",
-      prompt: "请把下面的句子中英互译, 并每句中英对照:\n",
+      prompt:
+        "你是一名优秀的翻译, 下面的句子如果是中文请翻译成英文, 如果是英文请翻译成中文:\n",
       autoSend: true,
     },
     {
       title: "🛠️软件开发",
-      url: "https://instagram.com/",
+      url: "https://chat.openai.com/",
       hotkey: "alt+c",
-      prompt: "你是一名优秀的软件工程师:\n",
+      prompt: "你是一名优秀的软件工程师, 请按步骤给出答案.",
       autoSend: false,
     },
   ],
@@ -41,12 +44,21 @@ let config = {
 
 function createWindow() {
   console.log("createWindow");
+
   mainWindow = new BrowserWindow({
     webPreferences: {
       preload: path.join(__dirname, "index-preload.js"),
     },
     titleBarStyle: isMacOS ? "hiddenInset" : "default",
   });
+  mainWindow.setBounds(CONFIG.get("bounds"));
+
+  mainWindow.on("close", () => {
+    console.log("main.js", "mainWindow close");
+    console.log(JSON.stringify(mainWindow.getBounds()));
+    CONFIG.set("bounds", mainWindow.getBounds());
+  });
+
   mainWindow.webContents.loadFile("index.html");
   mainWindow.webContents.openDevTools({ mode: "detach" });
 }
@@ -108,7 +120,6 @@ app.on("ready", () => {
   regIpcHandles();
 
   app.on("will-quit", () => {
-    console.log("main.js", "will-quit");
     globalShortcut.unregisterAll();
   });
 
