@@ -14,7 +14,8 @@ let CONFIG = new Store();
 const isMacOS = process.platform === "darwin";
 
 let mainWindow;
-let browserViews = [];
+let currentActivePageIndex;
+let pageViews = [];
 
 let pageConfig = {
   pages: [
@@ -69,26 +70,25 @@ function createWindow() {
   mainWindow.webContents.openDevTools({ mode: "detach" });
 }
 
-function createPages() {
+function createPageViews() {
   pageConfig.pages.forEach((page, i) => {
-    const browserView = new BrowserView({
+    const view = new BrowserView({
       webPreferences: {
         preload: path.join(__dirname, "page-preload.js"),
       },
     });
-    mainWindow.addBrowserView(browserView);
-    browserView.webContents.loadURL(page.url);
+    mainWindow.addBrowserView(view);
+    view.webContents.loadURL(page.url);
 
-    browserViews.push(browserView);
+    pageViews.push(view);
 
     globalShortcut.register(page.hotkey, async () => {
       if (page.copySelection) {
-        triggerCopy();
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        await triggerCopy();
       }
       mainWindow.show();
       activatePage(null, i);
-      browserView.webContents.send("send-to-gpt", {
+      view.webContents.send("send-to-gpt", {
         autoSend: page.autoSend,
         text: page.prompt + (page.appendClipboard ? clipboard.readText() : ""),
       });
@@ -96,17 +96,23 @@ function createPages() {
   });
 }
 
-function triggerCopy() {
-  exec(
-    `/usr/bin/osascript -e '
-    tell application "System Events"
-      keystroke "c" using {command down}
-    end tell'`,
-    (error, stdout, stderr) => {
-      error && console.error("copy error", error);
-      stderr && console.error("copy error", stderr);
+async function triggerCopy() {
+  console.log("triggerCopy");
+  clipboard.clear();
+  for (let i = 0; i < 4; i++) {
+    console.log("triggerCopy try", i);
+    exec(
+      `/usr/bin/osascript -e 'tell application "System Events" \n keystroke "c" using {command down} \n end tell'`,
+      (error, stdout, stderr) => {
+        error && console.error("copy error", error);
+        stderr && console.error("copy error", stderr);
+      }
+    );
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    if (clipboard.readText() !== "") {
+      break;
     }
-  );
+  }
 }
 
 function getPagesData() {
@@ -114,9 +120,14 @@ function getPagesData() {
   return pageConfig.pages;
 }
 
-function activatePage(_params, tabIndex) {
-  console.log("handleSetActiveTab", tabIndex);
-  let browserView = browserViews[tabIndex];
+function activatePage(_params, pageIndex) {
+  console.log("activatePage", currentActivePageIndex, pageIndex);
+  if (currentActivePageIndex === pageIndex) {
+    return;
+  }
+  currentActivePageIndex = pageIndex;
+
+  let browserView = pageViews[pageIndex];
   mainWindow.setBrowserView(browserView);
   browserView.setBounds({
     x: 0,
@@ -136,7 +147,7 @@ app.on("ready", () => {
   console.log("main.js", "ready");
 
   createWindow();
-  createPages();
+  createPageViews();
   activatePage(null, 0);
 
   regIpcHandles();
