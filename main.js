@@ -6,30 +6,34 @@ const {
   clipboard,
   ipcMain,
 } = require("electron");
+const { exec } = require("child_process");
 const Store = require("electron-store");
-let CONFIG = new Store();
-const { loadavg } = require("os");
 const path = require("path");
+
+let CONFIG = new Store();
 const isMacOS = process.platform === "darwin";
 
 let mainWindow;
 let browserViews = [];
 
-let config = {
+let pageConfig = {
   pages: [
     {
       title: "👩‍🏫解释",
       url: "https://chat.openai.com/",
       hotkey: "alt+z",
       prompt: "请用简单的语言解释给我:\n",
+      copySelection: true,
+      appendClipboard: true,
       autoSend: true,
     },
     {
       title: "🔠翻译",
       url: "https://chat.openai.com/",
       hotkey: "alt+x",
-      prompt:
-        "你是一名优秀的翻译, 下面的句子如果是中文请翻译成英文, 如果是英文请翻译成中文:\n",
+      prompt: "作为一名专业的翻译，请准确地将文本在这英语和汉语之间翻译:\n",
+      copySelection: true,
+      appendClipboard: true,
       autoSend: true,
     },
     {
@@ -37,6 +41,8 @@ let config = {
       url: "https://chat.openai.com/",
       hotkey: "alt+c",
       prompt: "你是一名优秀的软件工程师, 请按步骤给出答案.",
+      copySelection: false,
+      appendClipboard: false,
       autoSend: false,
     },
   ],
@@ -64,7 +70,7 @@ function createWindow() {
 }
 
 function createPages() {
-  config.pages.forEach((page, i) => {
+  pageConfig.pages.forEach((page, i) => {
     const browserView = new BrowserView({
       webPreferences: {
         preload: path.join(__dirname, "page-preload.js"),
@@ -75,21 +81,37 @@ function createPages() {
 
     browserViews.push(browserView);
 
-    globalShortcut.register(page.hotkey, () => {
+    globalShortcut.register(page.hotkey, async () => {
+      if (page.copySelection) {
+        triggerCopy();
+        await new Promise((resolve) => setTimeout(resolve, 200));
+      }
       mainWindow.show();
       activatePage(null, i);
       browserView.webContents.send("send-to-gpt", {
-        prompt: page.prompt,
         autoSend: page.autoSend,
-        text: clipboard.readText(),
+        text: page.prompt + (page.appendClipboard ? clipboard.readText() : ""),
       });
     });
   });
 }
 
+function triggerCopy() {
+  exec(
+    `/usr/bin/osascript -e '
+    tell application "System Events"
+      keystroke "c" using {command down}
+    end tell'`,
+    (error, stdout, stderr) => {
+      error && console.error("copy error", error);
+      stderr && console.error("copy error", stderr);
+    }
+  );
+}
+
 function getPagesData() {
   console.log("getPagesData");
-  return config.pages;
+  return pageConfig.pages;
 }
 
 function activatePage(_params, tabIndex) {
