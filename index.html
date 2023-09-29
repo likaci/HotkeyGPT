@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InstantGPT</title>
+    <style>
+      body,
+      ul {
+        margin: 0;
+        list-style: none;
+      }
+
+      #tabs-container {
+        height: 36px;
+        background-color: #dee1e6;
+        -webkit-app-region: drag;
+        padding-left: 70px;
+        display: flex;
+      }
+
+      .tab {
+        position: relative;
+        height: 33px;
+        -webkit-app-region: no-drag;
+        user-select: none;
+        font-size: 14px;
+        line-height: 33px;
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 0 20px;
+        margin-top: 3px;
+        color: #3c403c;
+      }
+
+      .tab:hover {
+        background-color: #eff1f3;
+      }
+
+      .tab:active {
+        background-color: #ffffff;
+      }
+
+      .tab::after {
+        content: "";
+        position: absolute;
+        top: 8px;
+        right: 0;
+        bottom: 8px;
+        width: 1px;
+        background-color: #8b8e92;
+      }
+    </style>
+  </head>
+  <body>
+    <ul id="tabs-container">
+      <li class="tab" onclick="">Tab 1</li>
+    </ul>
+    <script src="index-renderer.js"></script>
+  </body>
+</html>

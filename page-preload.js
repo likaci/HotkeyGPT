@@ -1,10 +1,10 @@
 const { ipcRenderer } = require("electron");
 
 window.addEventListener("DOMContentLoaded", () => {
-  console.log("preload.js", "DOMContentLoaded");
+  console.log("page", "DOMContentLoaded");
 
   ipcRenderer.on("send-to-gpt", (event, data) => {
-    console.log("preload.js", "send-to-gpt", data);
+    console.log("page", "send-to-gpt", data);
     const textarea = document.getElementById("prompt-textarea");
 
     if (textarea) {
@@ -12,7 +12,7 @@ window.addEventListener("DOMContentLoaded", () => {
       textarea.value = (data.prompt ? data.prompt : "") + data.text;
       textarea.dispatchEvent(new Event("input", { bubbles: true }));
     } else {
-      console.log("preload.js", "send-to-gpt", "textarea not found");
+      console.log("page", "send-to-gpt", "textarea not found");
     }
 
     if (data.autoSend) {
