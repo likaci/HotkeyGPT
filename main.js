@@ -11,6 +11,7 @@ const {
 const { exec } = require("child_process");
 const Store = require("electron-store");
 const path = require("path");
+const defaultConfig = require("./default-config");
 
 let CONFIG = new Store();
 const isMacOS = process.platform === "darwin";
@@ -18,38 +19,6 @@ const isMacOS = process.platform === "darwin";
 let mainWindow;
 let currentPageIndex;
 let pageViews = [];
-
-let pageConfig = {
-  pages: [
-    {
-      title: "👩‍🏫解释",
-      url: "https://chat.openai.com/",
-      hotkey: "alt+z",
-      prompt: "请用简单的语言解释给我:\n",
-      copySelection: true,
-      appendClipboard: true,
-      autoSend: true,
-    },
-    {
-      title: "🔠翻译",
-      url: "https://chat.openai.com/",
-      hotkey: "alt+x",
-      prompt: "作为一名专业的翻译，请准确地将文本在这英语和汉语之间翻译:\n",
-      copySelection: true,
-      appendClipboard: true,
-      autoSend: true,
-    },
-    {
-      title: "🛠️软件开发",
-      url: "https://chat.openai.com/",
-      hotkey: "alt+c",
-      prompt: "你是一名优秀的软件工程师, 请按步骤给出答案.",
-      copySelection: false,
-      appendClipboard: false,
-      autoSend: false,
-    },
-  ],
-};
 
 function createWindow() {
   console.log("createWindow");
@@ -73,7 +42,7 @@ function createWindow() {
 }
 
 function createPageViews() {
-  pageConfig.pages.forEach((page, i) => {
+  getConfig().pages.forEach((page, i) => {
     const view = new BrowserView({
       webPreferences: {
         preload: path.join(__dirname, "page-preload.js"),
@@ -102,7 +71,7 @@ function createPageViews() {
 function updateMenu() {
   let defaultMenu = Menu.getApplicationMenu();
   let submenu = [];
-  pageConfig.pages.forEach((page, i) => {
+  getConfig().pages.forEach((page, i) => {
     submenu.push(
       new MenuItem({
         label: page.title,
@@ -117,6 +86,19 @@ function updateMenu() {
   let menu = new MenuItem({ label: "Tab", submenu: submenu });
   defaultMenu.append(menu);
   Menu.setApplicationMenu(defaultMenu);
+}
+
+function openConfigWindow() {
+  settingsWindow = new BrowserWindow({
+    webPreferences: {
+      preload: path.join(__dirname, "config-preload.js"),
+    },
+  });
+  settingsWindow.loadFile("config.html");
+}
+
+function getConfig() {
+  return CONFIG.get("config") ?? defaultConfig;
 }
 
 async function triggerCopy() {
@@ -140,12 +122,24 @@ async function triggerCopy() {
 
 function getPagesData() {
   console.log("getPagesData");
-  return pageConfig.pages;
+  return getConfig().pages;
 }
 
 function getCurrentPageIndex() {
   console.log("getCurrentPageIndex");
   return currentPageIndex;
+}
+
+function getConfigData() {
+  console.log("getConfigData");
+  return CONFIG.get("config");
+}
+
+function saveConfigData(event, data) {
+  console.log("saveConfigData", data);
+  CONFIG.set("config", data);
+  app.relaunch();
+  app.exit();
 }
 
 function activatePage(_params, pageIndex) {
@@ -207,5 +201,9 @@ function notifyTabsChange(_params) {
 function regIpcHandles() {
   ipcMain.handle("getPagesData", getPagesData);
   ipcMain.handle("getCurrentPageIndex", getCurrentPageIndex);
+  ipcMain.on("openConfigWindow", openConfigWindow);
   ipcMain.on("activatePage", activatePage);
+
+  ipcMain.handle("getConfigData", getConfigData);
+  ipcMain.on("saveConfigData", saveConfigData);
 }

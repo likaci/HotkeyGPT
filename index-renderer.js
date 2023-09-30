@@ -1,5 +1,6 @@
 let tabsContainer = document.querySelector("#tabs-container");
 
+
 window.electronAPI.onTabsChange((event, pages) => {
   console.log("onTabsChange", event, pages);
   initTabs();
@@ -25,6 +26,10 @@ async function initTabs() {
     .join("");
   console.log("tabs", tabs);
   tabsContainer.innerHTML = tabs;
+}
+
+function openConfigWindow() {
+  window.electronAPI.openConfigWindow();
 }
 
 initTabs();
