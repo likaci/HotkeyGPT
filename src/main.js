@@ -11,7 +11,7 @@ const {
 const { exec } = require("child_process");
 const Store = require("electron-store");
 const path = require("path");
-const defaultConfig = require("./default-config");
+const defaultConfig = require("./const/default-config");
 
 let CONFIG = new Store();
 const isMacOS = process.platform === "darwin";
@@ -25,7 +25,7 @@ function createWindow() {
 
   mainWindow = new BrowserWindow({
     webPreferences: {
-      preload: path.join(__dirname, "index-preload.js"),
+      preload: path.join(__dirname, "index/index-preload.js"),
     },
     titleBarStyle: isMacOS ? "hiddenInset" : "default",
   });
@@ -33,12 +33,11 @@ function createWindow() {
 
   mainWindow.on("close", () => {
     console.log("main.js", "mainWindow close");
-    console.log(JSON.stringify(mainWindow.getBounds()));
     CONFIG.set("bounds", mainWindow.getBounds());
   });
 
-  mainWindow.webContents.loadFile("index.html");
-  mainWindow.webContents.openDevTools({ mode: "detach" });
+  mainWindow.webContents.loadFile(path.join(__dirname, "index/index.html"));
+  !app.isPackaged && mainWindow.webContents.openDevTools({ mode: "detach" });
 }
 
 function createPageViews() {
@@ -91,10 +90,10 @@ function updateMenu() {
 function openConfigWindow() {
   settingsWindow = new BrowserWindow({
     webPreferences: {
-      preload: path.join(__dirname, "config-preload.js"),
+      preload: path.join(__dirname, "config/config-preload.js"),
     },
   });
-  settingsWindow.loadFile("config.html");
+  settingsWindow.loadFile(path.join(__dirname, "config/config.html"));
 }
 
 function getConfig() {

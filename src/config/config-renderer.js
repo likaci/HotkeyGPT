@@ -1,4 +1,5 @@
 const textArea = document.getElementById("jsonTextArea");
+
 document.getElementById("saveButton").addEventListener("click", () => {
   try {
     let jsonData = JSON.parse(textArea.value);
