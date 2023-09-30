@@ -1,4 +1,4 @@
-const defaultConfig = {
+defaultConfig = {
   pages: [
     {
       title: "👩‍🏫解释",
@@ -29,3 +29,5 @@ const defaultConfig = {
     },
   ],
 };
+
+module.exports = defaultConfig;

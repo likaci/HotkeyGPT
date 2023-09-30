@@ -70,6 +70,7 @@ function createPageViews() {
 function updateMenu() {
   let defaultMenu = Menu.getApplicationMenu();
   let submenu = [];
+  console.log(getConfig());
   getConfig().pages.forEach((page, i) => {
     submenu.push(
       new MenuItem({
@@ -82,6 +83,14 @@ function updateMenu() {
       })
     );
   });
+  submenu.push(new MenuItem({ type: "separator" }));
+  submenu.push(
+    new MenuItem({
+      label: "Config",
+      accelerator: isMacOS ? "CMD+," : "",
+      click: openConfigWindow,
+    })
+  );
   let menu = new MenuItem({ label: "Tab", submenu: submenu });
   defaultMenu.append(menu);
   Menu.setApplicationMenu(defaultMenu);
@@ -97,7 +106,8 @@ function openConfigWindow() {
 }
 
 function getConfig() {
-  return CONFIG.get("config") ?? defaultConfig;
+  console.log("getConfig");
+  return CONFIG.get("config", defaultConfig);
 }
 
 async function triggerCopy() {
@@ -127,11 +137,6 @@ function getPagesData() {
 function getCurrentPageIndex() {
   console.log("getCurrentPageIndex");
   return currentPageIndex;
-}
-
-function getConfigData() {
-  console.log("getConfigData");
-  return CONFIG.get("config");
 }
 
 function saveConfigData(event, data) {
@@ -203,6 +208,6 @@ function regIpcHandles() {
   ipcMain.on("openConfigWindow", openConfigWindow);
   ipcMain.on("activatePage", activatePage);
 
-  ipcMain.handle("getConfigData", getConfigData);
+  ipcMain.handle("getConfigData", getConfig);
   ipcMain.on("saveConfigData", saveConfigData);
 }
