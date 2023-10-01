@@ -1,7 +1,7 @@
 {
   "name": "HotkeyGPT",
   "version": "1.0.0",
-  "description": "",
+  "description": "ChatGPT client with hotkey support",
   "main": "src/main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -10,7 +10,7 @@
     "make": "electron-forge make"
   },
   "keywords": [],
-  "author": "",
+  "author": "likaci",
   "license": "ISC",
   "devDependencies": {
     "@electron-forge/cli": "^6.4.2",

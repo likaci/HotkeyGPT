@@ -28,6 +28,7 @@ function createWindow() {
       preload: path.join(__dirname, "index/index-preload.js"),
     },
     titleBarStyle: isMacOS ? "hiddenInset" : "default",
+    frame: isMacOS,
   });
   mainWindow.setBounds(CONFIG.get("bounds"));
 
@@ -115,7 +116,13 @@ async function triggerCopy() {
   clipboard.clear();
   for (let i = 0; i < 4; i++) {
     exec(
-      `/usr/bin/osascript -e 'tell application "System Events" \n keystroke "c" using {command down} \n end tell'`,
+      isMacOS
+        ? `/usr/bin/osascript -e 'tell application "System Events" \n keystroke "c" using {command down} \n end tell'`
+        : `${path.join(
+            app.getAppPath().replace("\\resources\\app.asar", ""),
+            "resources",
+            "nircmdc.exe"
+          )} sendkeypress ctrl+c`,
       (error, stdout, stderr) => {
         error && console.error("copy error", error);
         stderr && console.error("copy error", stderr);
