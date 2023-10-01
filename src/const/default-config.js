@@ -1,4 +1,38 @@
-defaultConfig = {
+const defaultConfigEN = {
+  pages: [
+    {
+      title: "👩‍🏫Explain",
+      url: "https://chat.openai.com/",
+      hotkey: "alt+z",
+      prompt: "Please explain it to me in simple terms.:\n",
+      copySelection: true,
+      appendClipboard: true,
+      autoSend: true,
+    },
+    {
+      title: "🔠Translate",
+      url: "https://chat.openai.com/",
+      hotkey: "alt+x",
+      prompt:
+        "As a professional translator, please translate the text accurately between English and Chinese.:\n",
+      copySelection: true,
+      appendClipboard: true,
+      autoSend: true,
+    },
+    {
+      title: "🛠️Dev",
+      url: "https://chat.openai.com/",
+      hotkey: "alt+c",
+      prompt:
+        "You are an excellent software engineer, please provide the answer step by step.",
+      copySelection: false,
+      appendClipboard: false,
+      autoSend: false,
+    },
+  ],
+};
+
+const defaultConfigCN = {
   pages: [
     {
       title: "👩‍🏫解释",
@@ -30,4 +64,4 @@ defaultConfig = {
   ],
 };
 
-module.exports = defaultConfig;
+module.exports = { defaultConfigCN, defaultConfigEN };

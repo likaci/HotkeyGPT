@@ -11,7 +11,7 @@ const {
 const { exec } = require("child_process");
 const Store = require("electron-store");
 const path = require("path");
-const defaultConfig = require("./const/default-config");
+const { defaultConfigCN, defaultConfigEN } = require("./const/default-config");
 
 let CONFIG = new Store();
 const isMacOS = process.platform === "darwin";
@@ -108,7 +108,10 @@ function openConfigWindow() {
 
 function getConfig() {
   console.log("getConfig");
-  return CONFIG.get("config", defaultConfig);
+  return CONFIG.get(
+    "config",
+    app.getLocale().startsWith("zh") ? defaultConfigCN : defaultConfigEN
+  );
 }
 
 async function triggerCopy() {
